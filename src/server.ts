@@ -21,7 +21,6 @@ app.post("/webhook", (req: Request, res: Response): any => {
             return res.status(400).json({ message: "Payload already received." });
         }
 
-        console.log("Payload received:", req.body);
         secretMessage = req.body.secretMessage;
         payloadReceivedAt = Date.now();
 
@@ -49,19 +48,25 @@ app.post("/submit", (req: Request, res: Response): any => {
 
         // convert timeLapsw to seconds 
         const timeLapsed = payloadReceivedAt ? (Date.now() - payloadReceivedAt) / 1000 : null;
-
+        // important info i want to see in console.
         console.log("Submission received:", { secretCode, repoUrl, timeTaken: timeLapsed });
 
         res.status(200).json({
             message: "Submission successful",
             timeTaken: `${timeLapsed} seconds`
         });
-        // log error and throw appropriate errpr log to effectivley debug
-
+        // catch and log error and throw appropriate errpr log to effectivley debug
     } catch (error) {
         console.error("Error handling submission:", error);
         res.status(500).json({ error: "Internal Server Error" });
     }
+});
+
+app.get("/secret", (req: express.Request, res: express.Response): any => {
+    if (!secretMessage) {
+        return res.status(404).json({ message: "No secret message stored yet." });
+    }
+    res.status(200).json({ secretMessage });
 });
 
 app.listen(PORT, () => {
